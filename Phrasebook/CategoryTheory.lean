@@ -94,7 +94,7 @@ variable {C : Type*} [Category* C]
 
 The composition of morphisms in a category is associative. When a term
 is a composition of more than two morphisms, it is associated towards
-the right, and this is also the simp normal form.
+the right, and this is also the `simp` normal form.
 
 ```lean
 
