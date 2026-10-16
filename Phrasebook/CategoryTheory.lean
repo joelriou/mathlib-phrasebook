@@ -33,7 +33,7 @@ The exposition is split in the following subsections:
 # Category
 
 A category involves a notion of objects, a notion of morphisms
-between two such objects, a distinguished morphism from an object into
+between two such objects, a distinguished morphism from any object to
 itself (the identity), the composition law of morphisms, and a few axioms.
 In Mathlib, a category is thought as a structure on the type
 of objects, and this structure involves a typeclass `Category`.
@@ -73,17 +73,57 @@ and `Y : C`, the type `X ⟶ Y` of morphisms from `X` to `Y`
 belongs to `Type v` for a certain universe `v`. If we need to be specific
 about these two universe parameters `u` (for objects) and
 `v` (for morphisms), we do:
+::: leanSection
 ```lean
 universe v u -- `v` purposely appears first
 variable {C : Type u} [Category.{v} C]
 ```
+:::
 Otherwise, `variable {C : Type*} [Category* C]` would register
 two fresh arbitrary universes. Declaring a `u`-small category
 can be done as
-```
+::: leanSection
+```lean
 variable {C : Type u} [SmallCategory C]
   -- this is equivalent to `[Category.{u} C]`
 ```
+:::
+
+
+A few examples of categories will be discussed in this phrasebook. One of
+the basic examples if the category structure induced by a preorder. The
+definitions `homOfLE` and `leOfHom` can be used in order to transform
+an inequality `h : a ≤ b` into a morphism `a ⟶ b` in the category of
+a preorder, and vice versa:
+::: leanSection
+```lean
+variable {α : Type*} [Preorder α]
+#synth SmallCategory α
+
+example {a b : α} (h : a ≤ b) : a ⟶ b := homOfLE h
+example {a b : α} (f : a ⟶ b) : a ≤ b := leOfHom f
+
+```
+:::
+
+If `C` is a category, the opposite category is denoted `Cᵒᵖ`:
+::: leanSection
+```lean
+variable {C : Type*} [Category* C]
+
+open Opposite
+
+example (X : C) : Cᵒᵖ := op X
+example (X : Cᵒᵖ) : C := X.unop
+example {X Y : C} (f : X ⟶ Y) : op Y ⟶ op X := f.op
+example {X Y : Cᵒᵖ} (f : X ⟶ Y) : Y.unop ⟶ X.unop := f.unop
+```
+:::
+The objects of `Cᵒᵖ` (and also the morphisms in `Cᵒᵖ`) are
+implemented as a 1-field structure `Opposite`: we do not want
+to enforce `Cᵒᵖ = C`, because it would create a confusion
+about which `Category` instance on this type should be used.
+Note that the type `Cᵒᵖᵒᵖ` is not equal to `C` either!
 
 # Associativity of the composition
 
