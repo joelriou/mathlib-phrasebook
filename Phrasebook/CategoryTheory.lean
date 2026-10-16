@@ -21,8 +21,8 @@ We assume basic knowledge of both Lean and category theory.
 
 Most of the definitions regarding general category theory are in
 the `CategoryTheory` namespace. In order to use limits or colimits,
-we need often need the `CategoryTheory.Limits` sub-namespace. A typical
-file using category theory may contain:
+we need often need to open the `CategoryTheory.Limits` sub-namespace.
+A typical file using category theory may contain:
 
 ```lean
 open CategoryTheory Limits
@@ -34,7 +34,7 @@ The exposition is split in the following subsections:
 
 A category involves a notion of objects, a notion of morphisms
 between two such objects, a distinguished morphism from an object into
-itself (the identity), the composition law of morphisms, and the axioms.
+itself (the identity), the composition law of morphisms, and a few axioms.
 In Mathlib, a category is thought as a structure on the type
 of objects, and this structure involves a typeclass `Category`.
 
@@ -49,9 +49,9 @@ variable {C : Type*} [Category* C]
 
 example : X ⟶ Z := f ≫ g
 ```
-In VScode, the arrow `⟶` that is used to denote the type of morphisms is
-typed as `\hom` and it is different from the basic arrow `→` (typed as `\to`)
-used for the type of nondependent functions between two types.
+In VScode, the arrow `⟶` that is used to denote the type of morphisms in a
+category `C` is typed as `\hom` and it is different from the basic arrow `→`
+(typed as `\to`) used for the type of nondependent functions between two types.
 
 Note that the composition denoted here `f ≫ g` would usually be denoted "gf"
 in the mathematical literature. Getting used to this notation is a
@@ -87,14 +87,13 @@ variable {C : Type u} [SmallCategory C]
 
 # Associativity of the composition
 
-
 ::: leanSection
 ```lean -show
 variable {C : Type*} [Category* C]
 ```
 
-The composition of morphism in a category is associative. When a term
-is a composition of more than 2 morphisms, it is associated towards
+The composition of morphisms in a category is associative. When a term
+is a composition of more than two morphisms, it is associated towards
 the right, and this is also the simp normal form.
 
 ```lean
@@ -125,7 +124,7 @@ in more intricate cases, and it is also unconvenient because this would often
 require using `Category.assoc` explicitly in both forward and backwards directions.
 As it is a `simp` lemma, it is recommended to use it explicitly only in the forward direction.
 
-An alternative is given by specialized tactics:
+An alternative proof can be obtained using specialized tactics:
 ```lean
 example : f₀ ≫ f₁ ≫ f₂ ≫ f₃ = f₀ ≫ φ ≫ f₃ := by
   slice_lhs 2 3 => { rw [h] }
@@ -143,9 +142,12 @@ example : f₀ ≫ f₁ ≫ f₂ ≫ f₃ = f₀ ≫ φ ≫ f₃ := by
 This proof uses the term elaborator `reassoc_of%`: from an
 an equality like `h : f₁ ≫ f₂ = φ`, it produces
 a term `f₁ ≫ f₂ ≫ α = f₂ ≫ α` for a generic morphism `α`
-which can be used in rewrites. (Note that we do not need
+which can be used in rewrites. Note that we do not need
 the "dual" construction of a term `β ≫ f₁ ≫ f₂ = β ≫ f₂`
-because `h` can be directly rewritten in it.)
+because `h` can be directly rewritten in it. Indeed,
+this `reassoc_of% h` term could be rewritten in an
+arbitrary composition like `β₀ ≫ ... ≫ βₙ ≫ f₁ ≫ f₂ ≫ γ₀ ≫ ... ≫ γₘ`
+as soon as the list `[γ₀, ..., γₘ]` is nonempty.
 
 Similarly, we have a `@[reassoc]` attribute (often used
 in combination with `simp` as `@[reassoc (attr := simp)])`;
