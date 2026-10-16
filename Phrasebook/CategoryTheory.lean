@@ -127,7 +127,7 @@ As it is a `simp` lemma, it is recommended to use it explicitly only in the forw
 An alternative proof can be obtained using specialized tactics:
 ```lean
 example : f₀ ≫ f₁ ≫ f₂ ≫ f₃ = f₀ ≫ φ ≫ f₃ := by
-  slice_lhs 2 3 => { rw [h] }
+  slice_lhs 2 3 => rw [h]
 ```
 `slice_lhs` (and `slice_rhs`) are specialized `conv`-like tactics
 which allow to zoom on certain chunks in the middle of compositions
