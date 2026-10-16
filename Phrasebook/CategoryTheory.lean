@@ -194,5 +194,4 @@ in combination with `simp` as `@[reassoc (attr := simp)])`;
 when it is applied to a lemma `foo`, it generates another
 lemma `foo_assoc` similarly as `reassoc_of% h` is generated
 from `h` above.
-
 :::
