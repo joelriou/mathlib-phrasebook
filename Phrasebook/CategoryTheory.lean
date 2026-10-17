@@ -47,7 +47,8 @@ we proceed as follows:
 variable {C : Type*} [Category* C]
   {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z)
 
-example : X ⟶ Z := f ≫ g
+example : X ⟶ Z := f ≫ g -- type `≫` as `\gg`
+example : X ⟶ X := 𝟙 X -- type `𝟙` as `\b1`
 ```
 In VScode, the arrow `⟶` that is used to denote the type of morphisms in a
 category `C` is typed as `\hom` and it is different from the basic arrow `→`
@@ -195,3 +196,108 @@ when it is applied to a lemma `foo`, it generates another
 lemma `foo_assoc` similarly as `reassoc_of% h` is generated
 from `h` above.
 :::
+
+# Functors and natural transformations
+
+::: leanSection
+```lean -show
+variable {C D : Type*} [Category* C] [Category* D]
+```
+
+Assuming `C` and `D` are categories, the type `Functor C D`
+of functors from `C` to `D` is denoted `C ⥤ D`, where
+`⥤` is typed as `\functor`. The identity functor of the
+category `C` is `𝟭 C` (where `𝟭` is typed as `\sb1`).
+The composition of two functors `F : C₁ ⥤ C₂` and `G : C₂ ⥤ C₃`
+is `F ⋙ G : C₁ ⥤ C₃` where `⋙` is typed as `\ggg`. Similarly as
+for the composition of morphisms, this compostion `F ⋙ G` is
+usually denoted `GF` is the mathematical literature.
+
+For example, the identity functor is essentially defined
+as follows:
+```lean
+variable (C) in
+-- the actual definition in mathlib is `Functor.id`
+@[simps, implicit_reducible]
+def Functor.id' : C ⥤ C where
+  obj (X : C) := X
+  map {X Y : C} (f : X ⟶ Y) := f
+  map_id := by cat_disch
+```
+The action of a functor on objects is `obj`, and its action of morphism
+is `map`. There are two axioms `Functor.map_id` and `Functor.map_comp` in the
+`Functor` structure, but they have `by cat_disch` as a default proof.
+`cat_disch` is a tactic that is based on `aesop` which closes many
+basic goals in category theory. In this case, it was able to show that
+the identity functor preserves identity morphisms and the composition
+of morphisms. Many such goals for other structures are also automatically
+filled by this `cat_disch` tactic.
+
+(The `implicit_reducible` attribute is required for definitions of essentially
+all functors. Otherwise, when trying to prove equalities of morphisms involving
+the action of functors, Lean may not be able to see through the `obj` fields
+of functors. Basically, any definiton of a structure that has a field which
+involves objects in a category should be declared `implicit_reducible`.)
+
+The type `C ⥤ D` of functors is endowed with a category structure.
+A morphism `f : F ⟶ G` from `F` to `G` in the category of functors `C ⥤ D`
+is a natural transformation, i.e. a term in the type `NatTrans F G`.
+
+```lean
+variable {F G : C ⥤ D} (f : F ⟶ G)
+example (X : C) : F.obj X ⟶ G.obj X := f.app X
+
+/- the naturality of a natural transformation `f : F ⟶ G`
+with respect to a morphism `g: X ⟶ Y` in `C` -/
+example {X Y : C} (g : X ⟶ Y) :
+    F.map g ≫ f.app Y = f.app X ≫ G.map g :=
+  f.naturality g
+```
+
+Because Lean has a suitable hierarchy of universes, there is no
+"set-theoretical" issue regarding the "existence" of functor categories.
+Whatever the universes parameters for the categories `C` and `D` are
+(and they may be different for `C` and `D`!), the type of functors `C ⥤ D`
+and the type of natural transformation `F ⟶ G` between two functors in `C ⥤ D`
+live in suitable universes.
+:::
+
+# Isomorphisms
+
+::: leanSection
+```lean -show
+variable {C D : Type*} [Category* C] [Category* D]
+```
+
+An isomorphism between two objects `X` and `Y` in a category
+`C` is a term `e` in the type `Iso X Y`, which is denoted `X ≅ Y`
+(type `≅` as `\cong`). It involves a morphism `e.hom : X ⟶ Y` in
+the forward direction, a morphism `e.inv : Y ⟶ X` in the backwards
+direction and two axioms `e.hom_inv_id : e.hom ≫ e.inv = 𝟙 X` and
+`e.inv_hom_id : e.inv ≫ e.hom = 𝟙 Y` (which Lean tries to auto-fill
+`by cat_disch`). For example, the composition of two isomorphisms
+is defined as follows:
+```lean
+variable {X Y Z : C} (e₁ : X ≅ Y) (e₂ : Y ≅ Z)
+
+-- the definition is mathlib is `Iso.trans`,
+-- and it is denoted `e₁ ≪≫ e₂`
+@[simps]
+def Iso.trans' : X ≅ Z where
+  hom := e₁.hom ≫ e₂.hom
+  inv := e₂.inv ≫ e₁.inv
+```
+
+In particular, if `F` and `G` are functors in `C ⥤ D`, we may say that
+they are naturally isomorphic when we have `e : F ≅ G`:
+```lean
+variable {F G : C ⥤ D} (e : F ≅ G)
+example (X : C) : F.obj X ≅ G.obj X := e.app X
+```
+:::
+
+# The category of types
+
+If `u` is a universe, `Type u` (which is the type of types in the universe `u`)
+is a category. We tend to call it the category of types, but in the mathematical
+literature, it may be referred to as the category of sets.
