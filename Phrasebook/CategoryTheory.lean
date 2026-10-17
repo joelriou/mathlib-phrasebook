@@ -294,10 +294,85 @@ they are naturally isomorphic when we have `e : F ≅ G`:
 variable {F G : C ⥤ D} (e : F ≅ G)
 example (X : C) : F.obj X ≅ G.obj X := e.app X
 ```
+
+Terms in the type of isomorphisms `X ≅ Y` contain data. We also
+have a `Prop`-valued typeclass `IsIso f` which can be used to
+express that a morphism `f : X ⟶ Y` is an isomorphism.
+```lean
+variable (f : X ⟶ Y) [IsIso f]
+
+-- `inv f` is a choice of inverse to `f`
+noncomputable example : Y ⟶ X := inv f
+example : f ≫ inv f = 𝟙 X := by simp
+example : inv f ≫ f = 𝟙 Y := by simp
+```
 :::
 
 # The category of types
 
 If `u` is a universe, `Type u` (which is the type of types in the universe `u`)
-is a category. We tend to call it the category of types, but in the mathematical
-literature, it may be referred to as the category of sets.
+is a category: we may call it the category of types. In set-theoretical
+foundations, this would be called "the category of sets".
+
+If `f : X ⟶ Y` is a morphism in the category of types, one may evaluate
+it at `x : X`:
+::: leanSection
+```lean
+example {X Y : Type u} (f : X ⟶ Y) (x : X) : Y := f x
+```
+:::
+This holds more generally for concrete categories (e.g. `ModuleCat R` for the
+category of `R`-modules, `AddCommGrpCat` for the category of abelian groups, etc.).
+
+If `X` and `Y` are types, the type of morphisms `X ⟶ Y` in the category of types
+is not definitionally equal to the type `X → Y` of functions from `X` to `Y`. In order
+to define a morphism, we use a constructor that we access using the
+notation `↾` (typed as `\uprightharpoon`). The map `x ↦ x ^ 2` from `ℕ` to `ℕ`,
+as a morphism in the category of types, can be defined as:
+```lean
+example : ℕ ⟶ ℕ := ↾(fun x ↦ x ^ 2)
+```
+
+# Yoneda's lemma
+
+If `C` is a category (with morphisms in the universe `Type v`), the Yoneda embedding is
+a fully-faithful embedding of `C` in the category of presheaves `Cᵒᵖ ⥤ Type v`. It sends
+an object `X : C` to the presheaf `yoneda.obj X` that is represented by `X`:
+this is the functor `Cᵒᵖ ⥤ Type v` which sends `Y : C` (considered as an object of `Cᵒᵖ`)
+to the type `Y ⟶ X`:
+::: leanSection
+```lean
+variable {C : Type u} [Category.{v} C]
+
+example : C ⥤ Cᵒᵖ ⥤ Type v := yoneda
+
+example {X Y : C} :
+    (yoneda.obj X).obj (.op Y) = (Y ⟶ X) := by
+  with_implicit rfl
+
+example : (yoneda : C ⥤ _).Faithful := inferInstance
+example : (yoneda : C ⥤ _).Full := inferInstance
+```
+
+We used the `Prop`-valued typeclasses `Functor.Faithful` and `Functor.Full` in order to
+state that `yoneda : C ⥤ Cᵒᵖ ⥤ Type v` is fully faithful. We also a structure
+`Functor.FullyFaithful` which contains the data of preimages of morphisms by a functor.
+
+```lean
+example : (yoneda : C ⥤ _).FullyFaithful where
+  preimage {X Y} f := f.app _ (𝟙 X)
+  map_preimage {X Y} f := by
+    ext _ g
+    simpa using congr($(f.naturality g.op) (𝟙 _)).symm
+```
+
+More generally, if `F : Cᵒᵖ ⥤ Type v` is a presheaf of types and `X : C`,
+there is a bijection between the type of natural transformations `yoneda.obj X ⟶ F`
+and the type `F.obj (.op X)` of "sections" of `F` on `X`:
+```lean
+example {X : C} {F : Cᵒᵖ ⥤ Type v} :
+    (yoneda.obj X ⟶ F) ≃ F.obj (.op X) :=
+  yonedaEquiv
+```
+
+:::
