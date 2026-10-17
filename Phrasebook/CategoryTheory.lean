@@ -355,7 +355,7 @@ example : (yoneda : C ⥤ _).Full := inferInstance
 ```
 
 We used the `Prop`-valued typeclasses `Functor.Faithful` and `Functor.Full` in order to
-state that `yoneda : C ⥤ Cᵒᵖ ⥤ Type v` is fully faithful. We also a structure
+state that `yoneda : C ⥤ Cᵒᵖ ⥤ Type v` is fully faithful, but we also a structure
 `Functor.FullyFaithful` which contains the data of preimages of morphisms by a functor.
 
 ```lean
@@ -363,7 +363,7 @@ example : (yoneda : C ⥤ _).FullyFaithful where
   preimage {X Y} f := f.app _ (𝟙 X)
   map_preimage {X Y} f := by
     ext _ g
-    simpa using congr($(f.naturality g.op) (𝟙 _)).symm
+    simpa using congr($(f.naturality g.op) (𝟙 X)).symm
 ```
 
 More generally, if `F : Cᵒᵖ ⥤ Type v` is a presheaf of types and `X : C`,
@@ -374,5 +374,67 @@ example {X : C} {F : Cᵒᵖ ⥤ Type v} :
     (yoneda.obj X ⟶ F) ≃ F.obj (.op X) :=
   yonedaEquiv
 ```
+:::
 
+# Full subcategories
+
+::: leanSection
+```lean -show
+variable {C : Type*} [Category* C]
+```
+
+If `C` is a category, there is a type `ObjectProperty C` of properties
+of objects of `C`, i.e. predicates `C → Prop`. For example, if `X` is an
+object of a category `C`, one may define the property of objects of `C`
+that are isomorphic to `X`, show that this property is closed
+under isomorphisms, and that it is the closure under isomorphisms of
+the property of objects that is only satisfied by `X`:
+
+```lean
+variable (X : C)
+
+def isIsomorphicTo : ObjectProperty C :=
+  fun Y ↦ Nonempty (X ≅ Y)
+
+instance :
+    (isIsomorphicTo X).IsClosedUnderIsomorphisms where
+  of_iso := by
+    intro _ _ e₁ ⟨e₂⟩
+    exact ⟨e₂ ≪≫ e₁⟩
+
+example :
+    isIsomorphicTo X =
+      (ObjectProperty.singleton X).isoClosure := by
+  refine le_antisymm ?_ ?_
+  · intro _ ⟨e⟩
+    exact ⟨X, by simp, ⟨e.symm⟩⟩
+  · rw [ObjectProperty.isoClosure_le_iff]
+    intro _ ⟨_⟩
+    exact ⟨Iso.refl _⟩
+```
+
+The full subcategory of `C` consisting of objects `X : C` satisfying
+a given property `P : ObjectProperty C` is `P.FullSubcategory` and
+the inclusion functor `P.FullSubcategory ⥤ C` is `P.ι`:
+```lean
+#synth Category (isIsomorphicTo X).FullSubcategory
+
+example : (isIsomorphicTo X).FullSubcategory ⥤ C :=
+  (isIsomorphicTo X).ι
+```
+
+Similarly to the type `ObjectProperty C` of properties of objects of `C`,
+we have the type `MorphismProperty C` of properties of morphisms in `C`
+(which resembles the type `ObjectProperty (Arrow C)` of properties
+of objects in the category of arrows in `C`). Similarly, certain typeclasses
+express that `W : MorphismProperty C` is stable under composition
+(`MorphismProperty.IsStableUnderComposition`), is stable under
+base change (`MorphismProperty.IsStableUnderBaseChange`), etc.
+If `W : MorphismProperty C` is multiplicative (`MorphismProperty.IsMultiplicative`),
+i.e. contains identities and is stable under composition, then we may also
+consider the widesubcategory of `C` consisting of the morphisms satisfying `W`:
+```lean
+variable (W : MorphismProperty C) [W.IsMultiplicative]
+#synth Category (WideSubcategory W)
+```
 :::
