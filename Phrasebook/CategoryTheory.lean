@@ -226,7 +226,8 @@ The action of a functor on objects is `obj`, and its action of morphism
 is `map`. There are two axioms `Functor.map_id` and `Functor.map_comp` in the
 `Functor` structure, but they have `by cat_disch` as a default proof.
 `cat_disch` is a tactic that is based on `aesop` which closes many
-basic goals in category theory. In this case, it was able to show that
+basic goals in category theory (in many cases, `simp` or `ext <;> simp` would
+also close goals). In this case, it was able to show that
 the identity functor preserves identity morphisms and the composition
 of morphisms. Many such goals for other structures in category theory are
 also automatically filled by this `cat_disch` tactic.
