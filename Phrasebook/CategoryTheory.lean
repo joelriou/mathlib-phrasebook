@@ -21,7 +21,7 @@ We assume basic knowledge of both Lean and category theory.
 
 Most of the definitions regarding general category theory are in
 the `CategoryTheory` namespace. In order to use limits or colimits,
-we need often need to open the `CategoryTheory.Limits` sub-namespace.
+we often need to open the `CategoryTheory.Limits` sub-namespace.
 A typical file using category theory may contain:
 
 ```lean
@@ -30,7 +30,7 @@ open CategoryTheory Limits
 
 The exposition is split in the following subsections:
 
-# Category
+# Categories
 
 A category involves a notion of objects, a notion of morphisms
 between two such objects, a distinguished morphism from any object to
@@ -48,7 +48,6 @@ variable {C : Type*} [Category* C]
   {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z)
 
 example : X ⟶ Z := f ≫ g -- type `≫` as `\gg`
-example : X ⟶ X := 𝟙 X -- type `𝟙` as `\b1`
 ```
 In VScode, the arrow `⟶` that is used to denote the type of morphisms in a
 category `C` is typed as `\hom` and it is different from the basic arrow `→`
@@ -60,7 +59,7 @@ in the mathematical literature. Getting used to this notation is a
 the "gf" notation if you do too much formalization of category theory
 in Lean.
 
-The identity of an object `X` is denoted `𝟙 X`:
+The identity of an object `X` is denoted `𝟙 X` (type `𝟙` as `\b1`):
 ```lean
 example : f ≫ 𝟙 Y = f := by simp
 example : 𝟙 X ≫ f = f := by simp
@@ -182,8 +181,8 @@ example : f₀ ≫ f₁ ≫ f₂ ≫ f₃ = f₀ ≫ φ ≫ f₃ := by
 ```
 This proof uses the term elaborator `reassoc_of%`: from an
 an equality like `h : f₁ ≫ f₂ = φ`, it produces
-a term `f₁ ≫ f₂ ≫ α = f₂ ≫ α` for a generic morphism `α`
-which can be used in rewrites. Note that we do not need
+a term `f₁ ≫ f₂ ≫ α = f₂ ≫ α` for a generic morphism `α`,
+and it can be used in rewrites. Note that we do not need
 the "dual" construction of a term `β ≫ f₁ ≫ f₂ = β ≫ f₂`
 because `h` can be directly rewritten in it. Indeed,
 this `reassoc_of% h` term could be rewritten in an
@@ -222,7 +221,6 @@ variable (C) in
 def Functor.id' : C ⥤ C where
   obj (X : C) := X
   map {X Y : C} (f : X ⟶ Y) := f
-  map_id := by cat_disch
 ```
 The action of a functor on objects is `obj`, and its action of morphism
 is `map`. There are two axioms `Functor.map_id` and `Functor.map_comp` in the
@@ -230,8 +228,8 @@ is `map`. There are two axioms `Functor.map_id` and `Functor.map_comp` in the
 `cat_disch` is a tactic that is based on `aesop` which closes many
 basic goals in category theory. In this case, it was able to show that
 the identity functor preserves identity morphisms and the composition
-of morphisms. Many such goals for other structures are also automatically
-filled by this `cat_disch` tactic.
+of morphisms. Many such goals for other structures in category theory are
+also automatically filled by this `cat_disch` tactic.
 
 (The `implicit_reducible` attribute is required for definitions of essentially
 all functors. Otherwise, when trying to prove equalities of morphisms involving
@@ -258,7 +256,7 @@ Because Lean has a suitable hierarchy of universes, there is no
 "set-theoretical" issue regarding the "existence" of functor categories.
 Whatever the universes parameters for the categories `C` and `D` are
 (and they may be different for `C` and `D`!), the type of functors `C ⥤ D`
-and the type of natural transformation `F ⟶ G` between two functors in `C ⥤ D`
+and the type of natural transformations `F ⟶ G` between two functors in `C ⥤ D`
 live in suitable universes.
 :::
 
@@ -280,7 +278,7 @@ is defined as follows:
 ```lean
 variable {X Y Z : C} (e₁ : X ≅ Y) (e₂ : Y ≅ Z)
 
--- the definition is mathlib is `Iso.trans`,
+-- the definition in mathlib is `Iso.trans`,
 -- and it is denoted `e₁ ≪≫ e₂`
 @[simps]
 def Iso.trans' : X ≅ Z where
@@ -305,6 +303,10 @@ variable (f : X ⟶ Y) [IsIso f]
 noncomputable example : Y ⟶ X := inv f
 example : f ≫ inv f = 𝟙 X := by simp
 example : inv f ≫ f = 𝟙 Y := by simp
+
+-- `asIso f` promotes a morphism `f : X ⟶ Y`
+-- to an isomorphism `X ≅ Y` when `[IsIso f]` holds
+noncomputable example : X ≅ Y := asIso f
 ```
 :::
 
@@ -355,7 +357,7 @@ example : (yoneda : C ⥤ _).Full := inferInstance
 ```
 
 We used the `Prop`-valued typeclasses `Functor.Faithful` and `Functor.Full` in order to
-state that `yoneda : C ⥤ Cᵒᵖ ⥤ Type v` is fully faithful, but we also a structure
+state that `yoneda : C ⥤ Cᵒᵖ ⥤ Type v` is fully faithful, but we also have a structure
 `Functor.FullyFaithful` which contains the data of preimages of morphisms by a functor.
 
 ```lean
@@ -373,6 +375,20 @@ and the type `F.obj (.op X)` of "sections" of `F` on `X`:
 example {X : C} {F : Cᵒᵖ ⥤ Type v} :
     (yoneda.obj X ⟶ F) ≃ F.obj (.op X) :=
   yonedaEquiv
+```
+
+In addition to the `yoneda` bifunctor which is such that the target types are
+in `Type v` (which is the universe where morphisms in the category `C` live),
+we have a variant `uliftYoneda` which lift the types of morphisms into `Type max v w`,
+and the more general variant `shrinkYoneda` which applies to locally `w`-small categories:
+```lean
+noncomputable example :
+    C ⥤ Cᵒᵖ ⥤ Type max v w :=
+  uliftYoneda
+
+noncomputable example [LocallySmall.{w} C] :
+    C ⥤ Cᵒᵖ ⥤ Type w :=
+  shrinkYoneda
 ```
 :::
 
@@ -436,5 +452,32 @@ consider the widesubcategory of `C` consisting of the morphisms satisfying `W`:
 ```lean
 variable (W : MorphismProperty C) [W.IsMultiplicative]
 #synth Category (WideSubcategory W)
+```
+:::
+
+# Equivalences of categories
+
+An equivalence between two categories `C` and `D` is a term in the
+type `Equivalence C D`, which is denoted `C ≌ D`, where `≌` (typed as `\backcong`)
+should not be confused with `≅` (types as `\cong`). Such a an equivalence
+consists of two functors `functor : C ⥤ D` and `inverse : D ⥤ C`,
+and two isomorphisms `unitIso : 𝟭 C ≅ functor ⋙ inverse` and
+`counitIso : inverse ⋙ functor ≅ 𝟭 D` which satisfy a triangle identity
+(similarly as units and counits of adjunctions do).
+
+The equivalence between the opposite of the opposite of a category `C`
+and the category `C` can be defined as follows:
+:::leanSection
+```lean
+-- the mathlib definition is `opOpEquivalence`
+@[simps, implicit_reducible]
+def opOpEquivalence' (C : Type*) [Category* C] :
+    Cᵒᵖᵒᵖ ≌ C where
+  functor.obj X := X.unop.unop
+  functor.map f := f.unop.unop
+  inverse.obj X := .op (.op X)
+  inverse.map f := f.op.op
+  unitIso := Iso.refl _
+  counitIso := Iso.refl _
 ```
 :::
