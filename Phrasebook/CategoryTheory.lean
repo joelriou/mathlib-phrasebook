@@ -482,3 +482,37 @@ def opOpEquivalence' (C : Type*) [Category* C] :
   counitIso := Iso.refl _
 ```
 :::
+
+# Limits
+
+Mathlib has a significant API for (co)limits in a category `C`. If `F : J ⥤ C`
+is a functor and its limit exists `[HasLimit F]`, we may let Lean choose
+such a limit:
+
+:::leanSection
+```lean -show
+variable {J C : Type*} [Category* J] [Category* C]
+```
+
+```lean
+variable (F : J ⥤ C) [HasLimit F]
+
+-- a choice of a limit for a functor `F : J ⥤ C`
+noncomputable example : C := limit F
+
+noncomputable example (j : J) : limit F ⟶ F.obj j :=
+  limit.π F j
+
+-- if `c` is a cone for a functor, this is the canonical
+-- morphism for the point of `c` to the limit of `F`
+noncomputable example (c : Cone F) : c.pt ⟶ limit F :=
+  limit.lift F c
+```
+
+The "chosen" limit `limit F` should be used only when we
+need to make such a choice. Otherwise, it is recommended
+to use cones `c : Cone F` which satisfy the condition
+`IsLimit c` (which contains data), which is a way to express
+that the point `c.pt` of the cone `c` satisfies the
+universal property of the limit of `F`.
+:::
