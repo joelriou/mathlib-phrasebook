@@ -91,7 +91,7 @@ variable {C : Type u} [SmallCategory C]
 
 
 A few examples of categories will be discussed in this phrasebook. One of
-the basic examples if the category structure induced by a preorder. The
+the basic examples is the category structure induced by a preorder. The
 definitions `homOfLE` and `leOfHom` can be used in order to transform
 an inequality `h : a ≤ b` into a morphism `a ⟶ b` in the category of
 a preorder, and vice versa:
@@ -137,7 +137,6 @@ is a composition of more than two morphisms, it is associated towards
 the right, and this is also the `simp` normal form.
 
 ```lean
-
 variable {X Y Z T : C} (f : X ⟶ Y) (g : Y ⟶ Z) (h : Z ⟶ T)
 
 example : f ≫ g ≫ h = f ≫ (g ≫ h) := rfl
@@ -222,7 +221,7 @@ def Functor.id' : C ⥤ C where
   obj (X : C) := X
   map {X Y : C} (f : X ⟶ Y) := f
 ```
-The action of a functor on objects is `obj`, and its action of morphism
+The action of a functor on objects is `obj`, and its action on morphisms
 is `map`. There are two axioms `Functor.map_id` and `Functor.map_comp` in the
 `Functor` structure, but they have `by cat_disch` as a default proof.
 `cat_disch` is a tactic that is based on `aesop` which closes many
@@ -243,11 +242,12 @@ A morphism `f : F ⟶ G` from `F` to `G` in the category of functors `C ⥤ D`
 is a natural transformation, i.e. a term in the type `NatTrans F G`.
 
 ```lean
+#synth Category (C ⥤ D)
 variable {F G : C ⥤ D} (f : F ⟶ G)
 example (X : C) : F.obj X ⟶ G.obj X := f.app X
 
 /- the naturality of a natural transformation `f : F ⟶ G`
-with respect to a morphism `g: X ⟶ Y` in `C` -/
+with respect to a morphism `g : X ⟶ Y` in `C` -/
 example {X Y : C} (g : X ⟶ Y) :
     F.map g ≫ f.app Y = f.app X ≫ G.map g :=
   f.naturality g
@@ -257,7 +257,7 @@ Because Lean has a suitable hierarchy of universes, there is no
 "set-theoretical" issue regarding the "existence" of functor categories.
 Whatever the universes parameters for the categories `C` and `D` are
 (and they may be different for `C` and `D`!), the type of functors `C ⥤ D`
-and the type of natural transformations `F ⟶ G` between two functors in `C ⥤ D`
+and the types of natural transformations `F ⟶ G` between two functors in `C ⥤ D`
 live in suitable universes.
 :::
 
@@ -338,7 +338,7 @@ example : ℕ ⟶ ℕ := ↾(fun x ↦ x ^ 2)
 
 # Yoneda's lemma
 
-If `C` is a category (with morphisms in the universe `Type v`), the Yoneda embedding is
+If `C` is a category (with morphisms in the universe `v`), the Yoneda embedding is
 a fully-faithful embedding of `C` in the category of presheaves `Cᵒᵖ ⥤ Type v`. It sends
 an object `X : C` to the presheaf `yoneda.obj X` that is represented by `X`:
 this is the functor `Cᵒᵖ ⥤ Type v` which sends `Y : C` (considered as an object of `Cᵒᵖ`)
@@ -460,7 +460,7 @@ variable (W : MorphismProperty C) [W.IsMultiplicative]
 
 An equivalence between two categories `C` and `D` is a term in the
 type `Equivalence C D`, which is denoted `C ≌ D`, where `≌` (typed as `\backcong`)
-should not be confused with `≅` (types as `\cong`). Such a an equivalence
+should not be confused with `≅` (typed as `\cong`). Such a an equivalence
 consists of two functors `functor : C ⥤ D` and `inverse : D ⥤ C`,
 and two isomorphisms `unitIso : 𝟭 C ≅ functor ⋙ inverse` and
 `counitIso : inverse ⋙ functor ≅ 𝟭 D` which satisfy a triangle identity
@@ -504,7 +504,7 @@ noncomputable example (j : J) : limit F ⟶ F.obj j :=
   limit.π F j
 
 -- if `c` is a cone for a functor, this is the canonical
--- morphism for the point of `c` to the limit of `F`
+-- morphism from the point of `c` to the limit of `F`
 noncomputable example (c : Cone F) : c.pt ⟶ limit F :=
   limit.lift F c
 ```
