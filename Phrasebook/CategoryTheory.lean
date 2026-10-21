@@ -159,7 +159,7 @@ example : f₀ ≫ f₁ ≫ f₂ ≫ f₃ = f₀ ≫ φ ≫ f₃ := by
 
 This proof uses the associativity in order to make the term `f₀ ≫ (f₁ ≫ f₂) ≫ f₃`
 appear, which allows to rewrite `h`. Proceeding like this would be very unpractical
-in more intricate cases, and it is also unconvenient because this would often
+in more intricate cases, and it is also inconvenient because this would often
 require using `Category.assoc` explicitly in both forward and backwards directions.
 As it is a `simp` lemma, it is recommended to use it explicitly only in the forward direction.
 
