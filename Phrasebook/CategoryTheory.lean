@@ -208,7 +208,7 @@ of functors from `C` to `D` is denoted `C ⥤ D`, where
 category `C` is `𝟭 C` (where `𝟭` is typed as `\sb1`).
 The composition of two functors `F : C₁ ⥤ C₂` and `G : C₂ ⥤ C₃`
 is `F ⋙ G : C₁ ⥤ C₃` where `⋙` is typed as `\ggg`. Similarly as
-for the composition of morphisms, this compostion `F ⋙ G` is
+for the composition of morphisms, this composition `F ⋙ G` is
 usually denoted `GF` is the mathematical literature.
 
 For example, the identity functor is essentially defined
