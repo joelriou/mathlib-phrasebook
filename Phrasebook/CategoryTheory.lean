@@ -49,7 +49,7 @@ variable {C : Type*} [Category* C]
 
 example : X ⟶ Z := f ≫ g -- type `≫` as `\gg`
 ```
-In VScode, the arrow `⟶` that is used to denote the type of morphisms in a
+The arrow `⟶` that is used to denote the type of morphisms in a
 category `C` is typed as `\hom` and it is different from the basic arrow `→`
 (typed as `\to`) used for the type of nondependent functions between two types.
 
