@@ -255,7 +255,7 @@ example {X Y : C} (g : X ⟶ Y) :
 
 Because Lean has a suitable hierarchy of universes, there is no
 "set-theoretical" issue regarding the "existence" of functor categories.
-Whatever the universes parameters for the categories `C` and `D` are
+Whatever the universe parameters for the categories `C` and `D` are
 (and they may be different for `C` and `D`!), the type of functors `C ⥤ D`
 and the types of natural transformations `F ⟶ G` between two functors in `C ⥤ D`
 live in suitable universes.
