@@ -133,9 +133,9 @@ variable {C : Type*} [Category* C]
 ```
 
 The composition of morphisms in a category is associative. When a term
-is a composition of more than two morphisms, it is associated towards
-the right, and this is also the `simp` normal form.
-
+is a composition of more than two morphisms, the syntax is set up so that
+`f ≫ g ≫ h` means `f ≫ (g ≫ h)`, and this is also the `simp` normal form
+(i.e. `(f ≫ g) ≫ h` simplifies to `f ≫ g ≫ h`):
 ```lean
 variable {X Y Z T : C} (f : X ⟶ Y) (g : Y ⟶ Z) (h : Z ⟶ T)
 
