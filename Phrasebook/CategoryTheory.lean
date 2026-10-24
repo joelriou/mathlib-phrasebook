@@ -324,8 +324,6 @@ it at `x : X`:
 example {X Y : Type u} (f : X ⟶ Y) (x : X) : Y := f x
 ```
 :::
-This holds more generally for concrete categories (e.g. `ModuleCat R` for the
-category of `R`-modules, `AddCommGrpCat` for the category of abelian groups, etc.).
 
 If `X` and `Y` are types, the type of morphisms `X ⟶ Y` in the category of types
 is not definitionally equal to the type `X → Y` of functions from `X` to `Y`. In order
@@ -390,6 +388,55 @@ noncomputable example :
 noncomputable example [LocallySmall.{w} C] :
     C ⥤ Cᵒᵖ ⥤ Type w :=
   shrinkYoneda
+```
+:::
+
+# Concrete categories
+
+When doing constructions or stating theorems about concrete categories,
+a concrete category `C` can be introduced by using the following variables:
+::: leanSection
+```lean
+variable {C : Type*} [Category* C]
+  {FC : C → C → Type*} {CC : C → Type w}
+  [∀ X Y, FunLike (FC X Y) (CC X) (CC Y)]
+  [ConcreteCategory.{w} C FC]
+```
+This roughly means that a type `CC X` is attached to any object `X : C`,
+that the types of morphisms `X ⟶ Y` in the category `C` can be identified
+(up to a bijection) with a type `FC X Y` and that `FC X Y` injects into
+the type of functions `CC X → CC Y`.
+
+For example, if `R` is a ring, the category `ModuleCat R` is a concrete category,
+with `CC` being the underlying type of a `R`-module and `FC` the type of
+linear maps:
+```lean
+variable (R : Type*) [Ring R]
+#synth ConcreteCategory (ModuleCat R) (· →ₗ[R] ·)
+```
+Note that the types of morphisms in `ModuleCat R` are not defined directly using
+types of linear maps (they are defined using a `1`-field structure), but for
+concrete category instance, we could used `· →ₗ[R] ·`.
+
+If `C` is a concrete category, we have a faithful forget functor to the category
+of types:
+```lean
+example : C ⥤ Type w := forget C
+#synth (forget C).Faithful
+
+-- `ToType` is an abbreviation for `CC`,
+-- and if `f : X ⟶ Y` and `x : ToType X`,
+-- the syntax `f x` allows to evaluate `f` at `x`:
+example {X Y : C} (f : X ⟶ Y) (x : ToType X) :
+  ToType Y := f x
+```
+
+The lemma `comp_apply` relates the composition of morphisms and
+the evaluation:
+```lean
+variable {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) (h : X ⟶ Z)
+example : f ≫ g = h ↔ ∀ x, g (f x) = h x := by
+  simp only [ConcreteCategory.hom_ext_iff, comp_apply]
 ```
 :::
 
