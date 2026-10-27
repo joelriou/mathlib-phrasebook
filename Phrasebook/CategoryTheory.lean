@@ -416,7 +416,7 @@ variable (R : Type*) [Ring R]
 ```
 Note that the types of morphisms in `ModuleCat R` are not defined directly using
 types of linear maps (they are defined using a `1`-field structure), but for
-concrete category instance, we could used `· →ₗ[R] ·`.
+the concrete category instance, we could use `· →ₗ[R] ·`.
 
 If `C` is a concrete category, we have a faithful forget functor to the category
 of types:
